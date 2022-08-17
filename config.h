@@ -1,0 +1,26 @@
+#define MAIN_LOOP_MIN_INTERVAL_US 2000
+
+#define TIM1_PRESCALER 1
+#define MIN_PWM_FREQ 123 // Less than that would require more than 16 bits in OCR1A
+#define MAX_PWM_FREQ 30000
+
+#define PIN_THROTTLE A0
+#define PIN_CUR_SENS A1
+#define PIN_PWM 10
+#define PIN_MODE_SEL 2
+#define PIN_BRAKE 12
+#define PIN_LED 13
+
+#define CURRENT_LIMIT 15000 // in milliamps
+#define CURRENT_CONTROL_LOOP_KP 0.1
+#define CURRENT_CONTROL_LOOP_KI 0.001
+#define CURRENT_CONTROL_LOOP_I_LIMIT 50000
+
+#define THROTTLE_MIN (185 + 20)
+#define THROTTLE_MAX (873 - 20)
+#define THROTTLE_SAFETY_MARGIN 50
+#define THROTTLE_MAX_INCREASE 1
+#define THROTTLE_MAX_DECREASE 1024
+
+#define NUM_MODES 5
+#define MODE_SEL_DEBOUNCE_TIME 100 // in ms
