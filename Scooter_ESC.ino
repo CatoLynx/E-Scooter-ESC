@@ -55,8 +55,9 @@ music_t megalovania = {megalovania_notes, megalovania_durs, 2000, 2, 344};
 
 
 uint16_t prevThrottle = 0;
-uint8_t currentLimitActive = 0;
+uint16_t prevThrottleRaw = 0;
 uint8_t accelerationStarted = 0;
+uint8_t throttleOutsideSafetyMarginCount = 0;
 
 uint16_t musicNoteIndex = 0;
 uint32_t musicNoteStart = 0;
@@ -132,13 +133,13 @@ void changeMode() {
         break;
       }
 
-    case 3: {
+    case 4: {
         // Music: Rickroll
         setMusic(&rickroll);
         break;
       }
 
-    case 4: {
+    case 5: {
         // Music: Megalovania
         setMusic(&megalovania);
         break;
@@ -227,7 +228,7 @@ void loop() {
   if (modeSelState != lastModeSelState) {
     lastModeSelState = modeSelState;
     lastModeSelStateChange = millis();
-    modeChangePending = 1;
+    if (modeSelState == 1) modeChangePending = 1; // On rising edge
   }
   if (modeChangePending && (millis() - lastModeSelStateChange >= MODE_SEL_DEBOUNCE_TIME)) {
     modeChangePending = 0;
@@ -235,13 +236,18 @@ void loop() {
   }
 
   if (throttle < THROTTLE_MIN - THROTTLE_SAFETY_MARGIN || throttle > THROTTLE_MAX + THROTTLE_SAFETY_MARGIN) {
-    throttle = 0;
+    throttleOutsideSafetyMarginCount++;
+    if (throttleOutsideSafetyMarginCount >= THROTTLE_OUTSIDE_SAFETY_MARGIN_THRESHOLD) {
+      throttle = 0;
+      throttleOutsideSafetyMarginCount = 0;
+    }
   } else {
     if (throttle < THROTTLE_MIN) throttle = THROTTLE_MIN;
     if (throttle > THROTTLE_MAX) throttle = THROTTLE_MAX;
     throttle = map(throttle, THROTTLE_MIN, THROTTLE_MAX, 0, 1023);
   }
-  throttle = rateLimit(throttle, prevThrottle, THROTTLE_MAX_INCREASE, THROTTLE_MAX_DECREASE);
+  throttle = rateLimit(throttle, prevThrottleRaw, THROTTLE_MAX_INCREASE, THROTTLE_MAX_DECREASE);
+  prevThrottleRaw = throttle;
 
   int32_t curCtrlVal = currentControlLoop(current, CURRENT_LIMIT);
   if (curCtrlVal < 0) {
@@ -253,10 +259,6 @@ void loop() {
       //Serial.println("thr=0");
       throttle = 0;
     }
-  }
-
-  if (current >= CURRENT_LIMIT) {
-    //currentLimitActive = 1;
   }
 
   /*Serial.print("THR:");
@@ -271,7 +273,7 @@ void loop() {
     Serial.print("\tBRK:");
     Serial.println(!digitalRead(PIN_BRAKE));*/
 
-  if (!digitalRead(PIN_BRAKE) || currentLimitActive) throttle = 0;
+  if (!digitalRead(PIN_BRAKE)) throttle = 0;
 
   // accelerationStarted is set for the one loop cycle in which the throttle has become non-zero
   if (throttle != 0 && accelerationStarted) accelerationStarted = 0;
@@ -300,6 +302,18 @@ void loop() {
       case 2: {
           // Taurus
           setPwmFreq(freqs_taurus[map(throttle, 0, 1023, 0, 16)]);
+          break;
+        }
+
+      case 3: {
+          // NYC Subway R188 (Bombardier MITRAC)
+          if (throttle < 200) {
+            setPwmFreq(500);
+          } else if (200 <= throttle && throttle < 600) {
+            setPwmFreq(map(throttle, 200, 600, 500, 1000));
+          } else {
+            setPwmFreq(1000);
+          }
           break;
         }
 
