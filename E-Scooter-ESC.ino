@@ -122,6 +122,14 @@ void playMusic() {
   }
 }
 
+void playRandomNotes(uint16_t tempo) {
+  uint16_t duration = map(tempo, 0, 1023, 500, 50);
+  if (millis() - musicNoteStart >= duration) {
+    setPwmFreq(NOTES[random(NI_A2, NI_PAUSE)]);
+    musicNoteStart = millis();
+  }
+}
+
 void changeMode() {
   curMode++;
   if (curMode >= NUM_MODES) curMode = 0;
@@ -133,13 +141,13 @@ void changeMode() {
         break;
       }
 
-    case 4: {
+    case 5: {
         // Music: Rickroll
         setMusic(&rickroll);
         break;
       }
 
-    case 5: {
+    case 6: {
         // Music: Megalovania
         setMusic(&megalovania);
         break;
@@ -315,6 +323,12 @@ void loop() {
             setPwmFreq(1000);
           }
           break;
+        }
+
+      case 4: {
+          // Random notes
+          if (accelerationStarted) randomSeed(micros());
+          playRandomNotes(throttle);
         }
 
       default: {
