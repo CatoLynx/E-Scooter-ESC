@@ -329,6 +329,7 @@ void loop() {
           // Random notes
           if (accelerationStarted) randomSeed(micros());
           playRandomNotes(throttle);
+          break;
         }
 
       default: {
