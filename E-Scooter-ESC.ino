@@ -119,6 +119,10 @@ void playMusic() {
       Serial.print("\t");
       Serial.println(NOTES[pgm_read_byte(curMusic->notes + musicNoteIndex)]);*/
     musicNoteStart = millis();
+  } else if (musicNoteIndex + 1 < curMusic->length
+      && pgm_read_byte(curMusic->notes + musicNoteIndex) == pgm_read_byte(curMusic->notes + musicNoteIndex + 1)
+      && millis() - musicNoteStart >= (curMusic->tempo / pgm_read_byte(curMusic->durations + musicNoteIndex)) - 10) {
+    setPwmFreq(N_PAUSE);
   }
 }
 
