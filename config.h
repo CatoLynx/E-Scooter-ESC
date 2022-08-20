@@ -11,7 +11,7 @@
 #define PIN_BRAKE 12
 #define PIN_LED 13
 
-#define CURRENT_LIMIT 16000 // in milliamps
+#define CURRENT_LIMIT 20000 // in milliamps
 #define CURRENT_CONTROL_LOOP_KP 0.1
 #define CURRENT_CONTROL_LOOP_KI 0.001
 #define CURRENT_CONTROL_LOOP_I_LIMIT 50000
