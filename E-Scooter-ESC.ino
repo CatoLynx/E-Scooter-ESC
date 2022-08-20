@@ -111,7 +111,7 @@ void playMusic() {
     }*/
   if (millis() - musicNoteStart >= (curMusic->tempo / pgm_read_byte(curMusic->durations + musicNoteIndex))) {
     musicNoteIndex++;
-    if (musicNoteIndex >= curMusic->length) musicNoteIndex = curMusic->length - 1;
+    if (musicNoteIndex >= curMusic->length) musicNoteIndex = 0;
     setPwmFreq(NOTES[pgm_read_byte(curMusic->notes + musicNoteIndex)] * curMusic->freqMultiplier);
     /*Serial.print(musicNoteIndex);
       Serial.print("\t");
